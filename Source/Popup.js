@@ -1,20 +1,23 @@
 /*
 ---
-name: Popup
 description: A easy way to create manipulate and pass data through your popup's
-license: MIT-style
 
-authors:
-- Mient-jan Stelling <mientjan.stelling@gmail.com>
+license: 
+  - MIT-style
 
-provides: [Popup]
+authors: 
+  - Mient-jan Stelling <mientjan.stelling@gmail.com
 
 requires:
-- core/1.3.0:Object
-- core/1.3.0:Array
-- core/1.3.0:Class
-- core/1.3.0:Class.Options
+  - core/1.3:Object
+  - core/1.3:Array
+  - core/1.3:Class
+  - core/1.3:Class.Options
+  - core/1.3:Core
 
+provides: 
+  - Popup
+...
 */
 
 var Popup = new Class({
