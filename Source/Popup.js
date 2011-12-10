@@ -8,9 +8,6 @@ license: MIT-style
 authors:
 - Mient-jan Stelling <mientjan.stelling@gmail.com>
 
-thanks to:
-- Robert Slootjes for helping me test it and debug it.
-
 provides: [Popup]
 
 requires:
@@ -18,6 +15,9 @@ requires:
 - core/1.3.0:Array
 - core/1.3.0:Class
 - core/1.3.0:Class.Options
+
+thanks to:
+- Robert Slootjes for helping me test it and debug it.
 
 ---
 */
