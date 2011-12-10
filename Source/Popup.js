@@ -1,4 +1,3 @@
-
 /*
 ---
 name: Popup
@@ -18,8 +17,6 @@ requires:
 
 thanks to:
 - Robert Slootjes for helping me test it and debug it.
-
----
 */
 
 var Popup = new Class({
