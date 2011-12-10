@@ -118,6 +118,10 @@ var Popup = new Class({
 			}
 		} catch( err ){ }
 	},
+	
+	addCallback:function(fn){
+		this.callback.push(fn);
+	},
 	getWindow:function(){
 		return this.window;
 	}
