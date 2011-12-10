@@ -101,6 +101,7 @@ var Popup = new Class({
 		
 		this.window.close();
 		delete Popup._reference[this.reference];
+		Popup._referenceCount--;
 		
 	},
 	
@@ -125,9 +126,35 @@ var Popup = new Class({
 Popup._referenceCount = 0;
 Popup._reference = {};
 Popup._callback = [];
+Popup._closeInterval = null;
 
 Popup.fireCallback = function( data ){
 	this._callback.push(data);
+}
+
+Popup.close = function(){
+	
+	// popups have boon opened by this window and there for can not be closed
+	if( Popup._referenceCount > 0 ){
+		return; 
+	}
+	
+	if( this._closeInterval !== null ) {
+		if( this._callback.length <= 0 ){
+			clearInterval(this._closeInterval);
+			this._closeInterval = null;
+			window.close();
+		}
+	} else if( this._closeInterval === null )
+	{
+		if( this._callback.length <= 0){
+			window.close();
+		} else {
+			this.close.periodical(50, this);
+		}
+		
+	}
+	
 }
 /*
 Popup.close = function(){

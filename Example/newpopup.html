@@ -1,0 +1,29 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<script src="mootools-core-1.4.2.js"></script>
+		<script src="../Source/Popup.js"></script>
+	</head>
+	<body>
+		<button id="responseButton">give response</button>
+		<textarea id="textarea">
+			A nice response is given by the popup window.
+
+			And it works on all browsers even when the popupwindow has gone crossdomain.
+
+		</textarea>
+		
+		<script>
+			
+			Popup.fireCallback($('textarea').get('value'));
+			Popup.close();
+			
+		</script>
+	</body>
+</html>
