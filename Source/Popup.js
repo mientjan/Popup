@@ -15,8 +15,6 @@ requires:
 - core/1.3.0:Class
 - core/1.3.0:Class.Options
 
-thanks to:
-- Robert Slootjes for helping me test it and debug it.
 */
 
 var Popup = new Class({
