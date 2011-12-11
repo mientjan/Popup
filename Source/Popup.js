@@ -76,7 +76,9 @@ var Popup = new Class({
 	
 	open:function(){
 		if( this.window !== null ){
-			return; // window already opened
+			clearInterval( this.callbackInterval );
+			
+			// return; // window already opened
 		}
 		
 		var params = [];
