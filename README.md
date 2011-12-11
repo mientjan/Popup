@@ -38,11 +38,15 @@ var authPopup = new Popup('OAuth2.php', {
 });
 
 authPopup.addCallback(function(response){
+
     alert('callback is called and this response is given:' + response ');
+
 });
 
 authPopup.open();
+
 authPopup.close();
+
 var windowObject = authPopup.getWindow();
 
 authPopup.get('status'); // The status bar at the bottom of the window.
@@ -68,6 +72,9 @@ authPopup.get('x'); // position of popup relative to screen/window
 authPopup.get('y'); // position of popup relative to screen/window
 
 
+Set
+---
+
 You can only set data before you opened a popup.
 
 authPopup.set('status', true ); // The status bar at the bottom of the window.
@@ -89,7 +96,8 @@ authPopup.set('height', 150 ); // Specifies the height of the window in pixels. 
 authPopup.set('width', 300 ); // Specifies the width of the window in pixels.
 
 
-Except for x, y wich you can change all the time
+Except for 
+----------
 
 authPopup.set('x', 'center' ); // position of popup relative to screen/window
 
