@@ -12,7 +12,6 @@ license:
 authors: 
   - Mient-jan Stelling <mientjan.stelling@gmail.com
 
-requires:[]
 
 provides: 
   - Popup
