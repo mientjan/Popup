@@ -3,6 +3,8 @@ Popup
 
 Popup is a easy way to controll your popup's. With popup you can you can position your popup communicate easely between your popup opener and popup. 
 
+![Screenshot](https://github.com/mientjan/Popup/raw/master/screenshot.png)
+
 a working example is provided in Example/*
 
 How to Use
