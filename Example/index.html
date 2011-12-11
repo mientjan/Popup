@@ -7,28 +7,11 @@ and open the template in the editor.
 	<head>
 		<title></title>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-		<script src="mootools-core-1.4.2.js"></script>
-		<script src="../Source/Popup.js"></script>
 	</head>
 	<body>
-		<button id="popupOpener">open popup</button>
-		
-		<script>
-			
-			var aNewWindow = new Popup('newpopup.html', {
-				width:300,
-				height:150,
-				x:'center',
-				y:'center'
-			});
-			
-			aNewWindow.addCallback(function(response){
-				alert('niceeee that is a great response: ' + response );
-			});
-			
-			$('popupOpener').addEvent('click', function(e){
-				aNewWindow.open();
-			});
-		</script>
+		<ul>
+			<li><a href="mt.html">Mootools version</a></li>
+			<li><a href="nolib.html">No Library version</a></li>
+		</ul>
 	</body>
 </html>
