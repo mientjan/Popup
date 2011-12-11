@@ -1,7 +1,7 @@
 /*
 ---
 name: Popup
-version: 0.1.1
+version: 0.1.2
 description: A easy way to create manipulate and pass data through your popup's
 
 license: 
