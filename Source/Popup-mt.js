@@ -1,7 +1,9 @@
 /*
 ---
 name: Popup
-version: 0.1.2
+
+version: 0.1.3
+
 description: A easy way to create manipulate and pass data through your popup's
 
 license: 
@@ -214,18 +216,9 @@ Popup.close = function(){
 		if( this._callback.length <= 0){
 			window.close();
 		} else {
-			this.close.periodical(50, this);
+			this._closeInterval = this.close.periodical(50, this);
 		}
 		
 	}
 	
 }
-/*
-Popup.close = function(){
-	if( Object.getLength(Popup._reference) > 0 ){
-		return; // cant close this popup because this is not a popup.
-		// ore a popup that opened popups that first need to be closed
-	}
-	
-	window.close();
-}*/
