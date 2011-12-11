@@ -24,15 +24,23 @@ How to Use
 so now you want to return data to the original opener of the popup.
 
 the only thing you have to do is load Popup.js and call the function 
+
 	Popup.fireCallback({'data':'i want to return'});
+
 and when you want to close the popup you call 
+
 	Popup.close(); 
+
 in the opened popup.
 
 do not call 
+
 	window.close(); 
+
 but call 
+
 	Popup.close(); 
+
 this is because of browser and security issues relating to passing data 
 between the popup and the opener of the popup.
 
