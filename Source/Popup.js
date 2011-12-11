@@ -146,7 +146,7 @@ var Popup = new Class({
 			}
 		}
 		
-		this.moveTo(parseInt(x), parseInt(y));
+		this.window.moveTo(parseInt(x), parseInt(y));
 	},
 	
 	close:function(){
