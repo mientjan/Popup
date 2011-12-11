@@ -12,17 +12,15 @@ and open the template in the editor.
 	</head>
 	<body>
 		<button id="responseButton">give response</button>
-		<textarea id="textarea">
-			A nice response is given by the popup window.
-
-			And it works on all browsers even when the popupwindow has gone crossdomain.
-
-		</textarea>
+		<textarea id="textarea">A nice response is given by the popup window.
+And it works on all browsers even when the popupwindow has gone crossdomain.</textarea>
 		
 		<script>
 			
-			Popup.fireCallback($('textarea').get('value'));
-			Popup.close();
+			$('responseButton').addEvent('click', function(e){
+				Popup.fireCallback($('textarea').get('value'));
+				// Popup.close();
+			});
 			
 		</script>
 	</body>

@@ -48,6 +48,7 @@ var Popup = new Class({
 	initialize:function(url, options){
 		this.url = url;
 		this.setOptions(options);
+		this.callback = [];
 		
 		this.reference = 'n'+Popup._referenceCount;
 		Popup._referenceCount++;
@@ -58,6 +59,10 @@ var Popup = new Class({
 	set:function(k,v){
 		if( typeof(this.options[k]) !== 'undefined' ){
 			this.options[k] = v;
+			
+			if( k === 'x' || k === 'y'){
+				this._moveTo();
+			}
 		}
 	},
 
@@ -89,9 +94,59 @@ var Popup = new Class({
 
 
 		this.window = window.open(this.url, 'empty', params.join(',') );
-
+		this._moveTo();
 		// start callback checker
 		this.callbackInterval = this.callbackIntervalFunction.periodical(200, this);
+	},
+	
+	_moveTo:function(){
+		if(!this.window){
+			return;
+		}
+		
+		var x = this.get('x');
+		var y = this.get('y');
+		
+		if(typeof(x) == 'string'){
+			switch(x){
+				case 'center':{
+					x = ( window.screen.width - this.get('width') ) / 2;
+					break;
+				}
+				
+				case 'left':{
+					x = 0;
+					break;
+				}
+				
+				case 'right':{
+					x = ( window.screen.width - this.get('width') );
+					
+					break;
+				}
+			}
+		}
+		
+		if(typeof(y) == 'string'){
+			switch(y){
+				case 'center':{
+					y = ( window.screen.height - this.get('height') ) / 2;
+					break;
+				}
+				
+				case 'top':{
+					y = 0;
+					break;
+				}
+				
+				case 'bottom':{
+					y = ( window.screen.height - this.get('height') );
+					break;
+				}
+			}
+		}
+		
+		this.moveTo(parseInt(x), parseInt(y));
 	},
 	
 	close:function(){
@@ -108,11 +163,12 @@ var Popup = new Class({
 	callbackIntervalFunction:function(){
 		try { // try catch inplace because of popup being able to go crossdomain.
 			if( this.window.Popup._callback.length > 0 ){
-				clearInterval( this.callbackInterval );
-
+				
 				Array.each(this.callback, function(fn, i){
-					fn.call(fn, this);
-				}, this.window.Popup._callback[0] );
+					Array.each(this.window.Popup._callback, function(data, i){
+						fn.call(fn, data);
+					}, this );
+				}, this );
 
 				this.window.Popup._callback.length = 0;
 			}
