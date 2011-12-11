@@ -37,21 +37,16 @@ var authPopup = new Popup('OAuth2.php', {
     'y':'center' 
 });
 
-authPopup.addCallback(function(response){
+    authPopup.addCallback(function(response){
+        alert('callback is called and this response is given:' + response ');
+    });
 
-    alert('callback is called and this response is given:' + response ');
+    authPopup.open();
+    authPopup.close();
 
-});
-
-authPopup.open();
-
-authPopup.close();
-
-var windowObject = authPopup.getWindow();
-
-authPopup.get('status'); // The status bar at the bottom of the window.
-
-authPopup.get('toolbar'); // The standard browser toolbar, with buttons such as Back and Forward.
+    var windowObject = authPopup.getWindow();
+    authPopup.get('status'); // The status bar at the bottom of the window.
+    authPopup.get('toolbar'); // The standard browser toolbar, with buttons such as Back and Forward.
 
 authPopup.get('location'); // 1 The Location entry field where you enter the URL.
 
