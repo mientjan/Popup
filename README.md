@@ -98,3 +98,12 @@ Except for
 
 	authPopup.set('x', 'center' ); // position of popup relative to screen/window
 	authPopup.set('y', 'top' ); // position of popup relative to screen/window
+
+PS. There 2 versions
+----------------
+
+1. Source/Popup-mt.js a version that uses all the great stuff from mootools.
+
+And
+
+2. Source/Popup-nolib.js A non library version that works without mootools this is for when you cant use mootools for a project.
