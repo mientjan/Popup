@@ -4,7 +4,7 @@ name: Popup
 
 version: 0.1.3
 
-description: A easy way to create manipulate and pass data through your popup's
+description: A easy way to create manipulate and pass data through your popup's. This version uses Mootools for some functionality.
 
 license: 
   - MIT-style

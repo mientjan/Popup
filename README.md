@@ -103,6 +103,8 @@ Except for
 	
 	// position of popup relative to screen/window
 	authPopup.set('y', 'top' ); 
+	authPopup.set('y', 'center' ); 
+	authPopup.set('y', 'bottom' ); 
 
 
 no lib version
