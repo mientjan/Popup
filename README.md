@@ -96,14 +96,19 @@ You can only set data before you opened a popup.
 Except for 
 ----------
 
-	authPopup.set('x', 'center' ); // position of popup relative to screen/window
-	authPopup.set('y', 'top' ); // position of popup relative to screen/window
+	// position of popup relative to screen/window
+	authPopup.set('x', 'center' ); 
+	authPopup.set('x', 'left' ); 
+	authPopup.set('x', 'right' );
+	
+	// position of popup relative to screen/window
+	authPopup.set('y', 'top' ); 
 
-PS. There 2 versions
-----------------
 
-1. Source/Popup-mt.js a version that uses all the great stuff from mootools.
+no lib version
+--------------
 
-And
+And if you really cant use Mootools there is a no-lib version.
 
-2. Source/Popup-nolib.js A non library version that works without mootools this is for when you cant use mootools for a project.
+* Source/Popup-mt.js a version that uses all the great stuff from mootools.
+* Source/Popup-nolib.js A non library version that works without mootools this is for when you cant use mootools for a project.
