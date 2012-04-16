@@ -7,7 +7,7 @@ With Popup you can create, manipulate and communicate between its opener and the
 
 a working example is provided in Example
 
-Example
+How to Use
 ----------
 
 	var authPopup = new Popup('OAuth2.php', {
