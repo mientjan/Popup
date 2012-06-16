@@ -24,201 +24,232 @@ provides:
 ...
 */
 
-var Popup = new Class({
-	Implements: [Options],
-	options:{
-		// name:'empty', // window name
-		status:0, // The status bar at the bottom of the window.
-		toolbar:0, // The standard browser toolbar, with buttons such as Back and Forward.
-		location:0, //, // 1 The Location entry field where you enter the URL.
-		menubar:0, // The menu bar of the window
-		directories:0, // The standard browser directory buttons, such as What's New and What's Cool
-		resizable:0, // Allow/Disallow the user to resize the window.
-		scrollbars:0, // Enable the scrollbars if the document is bigger than the window
-		height:900, // Specifies the height of the window in pixels. (example: height='350')
-		width:400, // Specifies the width of the window in pixels.
-		x:'center', // position of popup relative to screen/window
-		y:'center' // position of popup relative to screen/window
+var Popup = (function(){
+	var Popup = new Class({
 
-	},
-	
-	window:null,
-	url:null,
-	callback:null,
-	callbackInterval:null,
-	window:null,
-	reference:0,
-	
-	initialize:function(url, options){
-		this.url = url;
-		this.setOptions(options);
-		this.callback = [];
-		
-		this.reference = 'n'+Popup._referenceCount;
-		Popup._referenceCount++;
-		
-		Popup._reference[this.reference] = this;
-	},
-	
-	set:function(k,v){
-		if( typeof(this.options[k]) !== 'undefined' ){
-			this.options[k] = v;
+		'Implements': [Options,Events],
+
+		'options':{
+			'name':null,	// window name
 			
-			if( k === 'x' || k === 'y'){
-				this._moveTo();
+			'status':0,			// The status bar at the bottom of the window.
+			'toolbar':0,		// The standard browser toolbar, with buttons such as Back and Forward.
+			'location':0,		// 1 The Location entry field where you enter the URL.
+			'menubar':0,		// The menu bar of the window
+			'directories':0,	// The standard browser directory buttons, such as What's New and What's Cool
+			'resizable':0,		// Allow/Disallow the user to resize the window.
+			'scrollbars':0,		// Enable the scrollbars if the document is bigger than the window
+			'height':900,		// Specifies the height of the window in pixels. (example: height='350')
+			'width':400,		// Specifies the width of the window in pixels.
+
+			'x':'center',		// position of popup relative to screen/window
+			'y':'center'		// position of popup relative to screen/window
+
+		},
+
+		'window':null,
+		'url':'',
+		'reference':'',
+		'_callbackInterval':0,
+
+		initialize:function(url,options)
+		{
+			this.setOptions(options);
+			this.url = url;
+
+			if(!this.options.name){
+				this.options.name = String.uniqueID();
 			}
-		}
-	},
 
-	get:function(k){
-		if( typeof(this.options[k]) !== 'undefined' ){
-			return this.options[k];
-		}
+			Popup.add(this);
+		},
 
-		return false;
-	},
-	
-	open:function(){
-		if( this.window !== null ){
-			clearInterval( this.callbackInterval );
+		set:function(k,v)
+		{
+			if( typeof(this.options[k]) !== 'undefined' ){
+				this.options[k] = v;
+
+				if( k === 'x' || k === 'y'){
+					this.moveTo();
+				}
+			}
 			
-			// return; // window already opened
-		}
-		
-		var params = [];
-		Object.each(this.options, function(value, key){
-			if(key=='x' || key=='y'){
+			return this;
+		},
+
+		get:function(k){
+			if( typeof(this.options[k]) !== 'undefined' ){
+				return this.options[k];
+			}
+
+			return false;
+		},
+
+		open:function()
+		{
+			if( this.window !== null ){
+				clearInterval( this.callbackInterval );
+			}
+
+			var params = [];
+			Object.each(this.options, function(value, key)
+			{
+				if(key=='x' || key=='y' || key=='name'){
+					return;
+				}
+
+				if( key == 'width' || key == 'height' ){
+					value = parseInt(value) + 'px';	
+				}
+
+				this.push( key + '=' + value );
+			}, params );
+
+
+			this.window = window.open(this.url, this.options.name, params.join(',') );
+			this._moveTo();
+			
+			// start callback checker
+			this.eventCheckingInterval = this._checkFiredEvents.periodical(200, this);
+		},
+
+		_moveTo:function(){
+			if(!this.window){
 				return;
 			}
+
+			var x = this.get('x');
+			var y = this.get('y');
+
+			if(typeof(x) == 'string'){
+				switch(x){
+					case 'center':{
+						x = ( window.screen.width - this.get('width') ) / 2;
+						break;
+					}
+
+					case 'left':{
+						x = 0;
+						break;
+					}
+
+					case 'right':{
+						x = ( window.screen.width - this.get('width') );
+
+						break;
+					}
+				}
+			}
+
+			if(typeof(y) == 'string'){
+				switch(y){
+					case 'center':{
+						y = ( window.screen.height - this.get('height') ) / 2;
+						break;
+					}
+
+					case 'top':{
+						y = 0;
+						break;
+					}
+
+					case 'bottom':{
+						y = ( window.screen.height - this.get('height') );
+						break;
+					}
+				}
+			}
+
+			this.window.moveTo(parseInt(x), parseInt(y));
+		},
+
+		close:function(){
+			if( this.window === null ){
+				return; // popup never opened or already closed
+			}
+
+			this.window.close();
 			
-			if( key == 'width' || key == 'height' ){
-				value = parseInt(value) + 'px';	
-			}
+			Popup.remove(this);
 
-			this.push( key + '=' + value );
-		}, params );
+		},
 
-
-		this.window = window.open(this.url, 'empty', params.join(',') );
-		this._moveTo();
-		// start callback checker
-		this.callbackInterval = this.callbackIntervalFunction.periodical(200, this);
-	},
-	
-	_moveTo:function(){
-		if(!this.window){
-			return;
-		}
-		
-		var x = this.get('x');
-		var y = this.get('y');
-		
-		if(typeof(x) == 'string'){
-			switch(x){
-				case 'center':{
-					x = ( window.screen.width - this.get('width') ) / 2;
-					break;
-				}
-				
-				case 'left':{
-					x = 0;
-					break;
-				}
-				
-				case 'right':{
-					x = ( window.screen.width - this.get('width') );
-					
-					break;
-				}
-			}
-		}
-		
-		if(typeof(y) == 'string'){
-			switch(y){
-				case 'center':{
-					y = ( window.screen.height - this.get('height') ) / 2;
-					break;
-				}
-				
-				case 'top':{
-					y = 0;
-					break;
-				}
-				
-				case 'bottom':{
-					y = ( window.screen.height - this.get('height') );
-					break;
-				}
-			}
-		}
-		
-		this.window.moveTo(parseInt(x), parseInt(y));
-	},
-	
-	close:function(){
-		if( this.window === null ){
-			return; // popup never opened or already closed
-		}
-		
-		this.window.close();
-		delete Popup._reference[this.reference];
-		Popup._referenceCount--;
-		
-	},
-	
-	callbackIntervalFunction:function(){
-		try { // try catch inplace because of popup being able to go crossdomain.
-			if( this.window.Popup._callback.length > 0 ){
-				
-				Array.each(this.callback, function(fn, i){
-					Array.each(this.window.Popup._callback, function(data, i){
-						fn.call(fn, data);
-					}, this );
+		_checkFiredEvents:function()
+		{
+			try 
+			{
+				Object.each( this.$events, function( name, events )
+				{
+					if( this.window.Popup._events[name]
+						&& this.window.Popup._events[name].length > 0 )
+					{
+						this.window.Popup._events[name].each(function(data)
+						{
+							this.fireEvent(name, data);
+						});
+						
+						this.window.Popup._events[name].length = 0;
+					}
 				}, this );
+			} catch(e){}
+			
+		},
 
-				this.window.Popup._callback.length = 0;
-			}
-		} catch( err ){ }
-	},
-	
-	addCallback:function(fn){
-		this.callback.push(fn);
-	},
-	getWindow:function(){
-		return this.window;
-	}
-});
-
-Popup._referenceCount = 0;
-Popup._reference = {};
-Popup._callback = [];
-Popup._closeInterval = null;
-
-Popup.fireCallback = function( data ){
-	this._callback.push(data);
-}
-
-Popup.close = function(){
-	
-	// popups have boon opened by this window and there for can not be closed
-	if( Popup._referenceCount > 0 ){
-		return; 
-	}
-	
-	if( this._closeInterval !== null ) {
-		if( this._callback.length <= 0 ){
-			clearInterval(this._closeInterval);
-			this._closeInterval = null;
-			window.close();
+		getWindow:function(){
+			return this.window;
 		}
-	} else if( this._closeInterval === null )
+	});
+
+	Popup.add = function(o){
+		o.reference = this.count;
+		this._reference[this.count] = o;
+		this._count++;
+	}
+	
+	Popup.remove = function(o){
+		delete Popup._reference[o.reference];
+	}
+
+	Popup._count = 0;
+	Popup._reference = [];
+	Popup._events = {};
+	Popup._closeInterval = null;
+
+	Popup.fireEvent = function( name, data )
 	{
-		if( this._callback.length <= 0){
-			window.close();
-		} else {
-			this._closeInterval = this.close.periodical(50, this);
+		if(!this._events[name])
+		{
+			this._events[name] = [];
 		}
 		
+		this._events[name].push(data);
 	}
+
+	Popup.hasEvents = function(){
+		var has = false;
+		if(Object.getLength(this._events) > 0){
+			Object.each(this._events, function(name, events){
+				if( events.length>0){
+					has = true;
+				}
+			});
+		}
+		
+		return has;
+	};
+
+	Popup.close = function(){
+		if(this.hasEvents()){
+			this._closeInterval = (function(){
+				if(this.hasEvents()){
+					clearInterval(this._closeInterval);
+					window.close();
+				}
+			}).periodical(200, this);
+		} else {
+			window.close();
+		}
+	};
 	
-}
+	return Popup;
+})();
