@@ -30,7 +30,7 @@ var Popup = (function(){
 		'Implements': [Options,Events],
 
 		'options':{
-			'name':null,	// window name
+			'name':null,		// if name is null / a unique name is generated
 			
 			'status':0,			// The status bar at the bottom of the window.
 			'toolbar':0,		// The standard browser toolbar, with buttons such as Back and Forward.
