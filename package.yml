@@ -2,4 +2,4 @@ name: Popup
 author: mienster
 category: Native
 tags: [popup, window]
-current: '1.1.1'
+current: ['1.1.1']
