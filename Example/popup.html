@@ -8,18 +8,25 @@ and open the template in the editor.
 		<title></title>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		<script src="mootools-core-1.4.2.js"></script>
-		<script src="../Source/Popup-mt.js"></script>
+		<script src="../Source/Popup.js"></script>
 	</head>
 	<body>
-		<button id="responseButton">give response</button>
+		<button id="success">Success</button>
+		<button id="failed">Failed</button>
+		
 		<textarea id="textarea">A nice response is given by the popup window.
 And it works on all browsers even when the popupwindow has gone crossdomain.</textarea>
-		
 		<script>
 			
-			$('responseButton').addEvent('click', function(e){
-				Popup.fireCallback($('textarea').get('value'));
-				// Popup.close();
+			$('success').addEvent('click', function(e){
+				Popup.fireEvent('success', $('textarea').get('value'));
+				Popup.close();
+			});
+			
+			$('failed').addEvent('click', function(e){
+				Popup.fireEvent('failed', $('textarea').get('value'));
+
+				Popup.close();
 			});
 			
 		</script>

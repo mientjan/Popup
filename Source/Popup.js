@@ -178,7 +178,7 @@ var Popup = (function(){
 		{
 			try 
 			{
-				Object.each( this.$events, function( name, events )
+				Object.each( this.$events, function( events, name )
 				{
 					if( this.window.Popup._events[name]
 						&& this.window.Popup._events[name].length > 0 )
@@ -186,7 +186,7 @@ var Popup = (function(){
 						this.window.Popup._events[name].each(function(data)
 						{
 							this.fireEvent(name, data);
-						});
+						}, this );
 						
 						this.window.Popup._events[name].length = 0;
 					}
