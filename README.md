@@ -19,7 +19,7 @@ How to Use
 	// popup is centered in the middle.
 
 	// create a callback so when Popup.fireCallback is called in the popup this method is called.
-	authPopup.addCallback(function(response){
+	authPopup.addEvent('success', function(response){
 		alert('callback is called and this response is given:' + response ');
 	});
 
@@ -28,7 +28,7 @@ How to Use
 
 
 
-do not call this method in the popup
+Please do not call window.close in the opened popup.
 
 	window.close(); 
 
@@ -53,7 +53,7 @@ Available methods
 		'y':'center' 
 	});
 
-	authPopup.addCallback(function(response){
+	authPopup.addEvent('success', function(response){
 		alert('callback is called and this response is given:' + response ');
 	});
 
@@ -104,7 +104,4 @@ Available methods
 no lib version
 --------------
 
-And if you really cant use Mootools there is a no-lib version.
-
-* Source/Popup-mt.js a version that uses all the great stuff from mootools.
-* Source/Popup-nolib.js A non library version that works without mootools this is for when you cant use mootools for a project.
+Has been removed do to bugs. Time constraints have forced me to remove this version and concentrate on the mootools version of this functionality.

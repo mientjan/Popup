@@ -5,13 +5,35 @@ and open the template in the editor.
 <!DOCTYPE html>
 <html>
 	<head>
-		<title></title>
+		<title>Popup - Example</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<script src="mootools-core-1.4.2.js"></script>
+		<script src="../Source/Popup-mt.js"></script>
 	</head>
 	<body>
-		<ul>
-			<li><a href="mt.html">Mootools version</a></li>
-			<li><a href="nolib.html">No Library version</a></li>
-		</ul>
+		
+		<button id="popupOpener">open popup</button>
+		
+		<script>
+			
+			var aNewWindow = new Popup('popup.html', {
+				width:300,
+				height:150,
+				x:'center',
+				y:'center'
+			});
+			
+			aNewWindow.addEvent('success', function(response){
+				alert('The user pressed on the success button in the popup');
+			});
+			
+			aNewWindow.addEvent('failed', function(response){
+				alert('The user pressed on the failed button in the popup');
+			});
+			
+			$('popupOpener').addEvent('click', function(e){
+				aNewWindow.open();
+			});
+		</script>
 	</body>
 </html>
