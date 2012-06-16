@@ -1,5 +1,7 @@
 name: Popup
 author: mienster
-current: 1.1
 category: Native
 tags: [popup, window]
+#docs: http://url.to.docs
+demo: http://mientjan.github.com/Popup/
+current: 1.1

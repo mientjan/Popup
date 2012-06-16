@@ -2,7 +2,7 @@
 ---
 name: Popup
 
-version: 0.1.3
+version: 1.1
 
 description: A easy way to create manipulate and pass data through your popup's. This version uses Mootools for some functionality.
 
