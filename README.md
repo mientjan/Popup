@@ -18,7 +18,7 @@ How to Use
 	});
 	// popup is centered in the middle.
 
-	// create a callback so when Popup.fireCallback is called in the popup this method is called.
+	// create a callback so when Popup.fireEvent('success', 'some data') is called in the popup this method is called.
 	authPopup.addEvent('success', function(response){
 		alert('callback is called and this response is given:' + response ');
 	});
