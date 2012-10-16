@@ -3,32 +3,6 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 }
-var Events = (function () {
-    function Events() { }
-    Events.prototype.addEvent = function (name, fn) {
-        if(!this._events[name]) {
-            this._events[name] = new Array();
-        }
-        this._events[name].push(fn);
-    };
-    Events.prototype.fireEvent = function (name, data) {
-        if(this._events[name]) {
-            for(var i = 0, l = this._events[name].length; i < l; ++i) {
-                this._events[name][i].call(null, data);
-            }
-        }
-    };
-    Events.prototype.removeEvents = function (name) {
-        if(this._events[name]) {
-            this._events[name].length = 0;
-        }
-    };
-    return Events;
-})();
-var UID = Date.now();
-String.prototype.uniqueID = function () {
-    return (UID++).toString(36);
-};
 (function (Object) {
     var hasOwnProperty = Object.prototype.hasOwnProperty;
     Object.prototype.keys = function (object) {
@@ -52,6 +26,46 @@ String.prototype.uniqueID = function () {
         return Object.keys(object).length;
     };
 })(Object);
+var UID = Date.now();
+function uniqueID() {
+    return (++UID).toString(UID);
+}
+var EventDispatcher = (function () {
+    function EventDispatcher() {
+        this._events = {
+        };
+    }
+    EventDispatcher.prototype.addEvent = function (name, fn) {
+        if(!this._events[name]) {
+            this._events[name] = new Array();
+        }
+        this._events[name].push(fn);
+    };
+    EventDispatcher.prototype.fireEvent = function (name, data) {
+        if(this._events[name]) {
+            for(var i = 0, l = this._events[name].length; i < l; ++i) {
+                this._events[name][i].call(null, data);
+            }
+        }
+    };
+    EventDispatcher.prototype.removeEvents = function (name) {
+        if(this._events[name]) {
+            this._events[name].length = 0;
+        }
+    };
+    EventDispatcher.prototype.removeEvent = function (name, fn) {
+        if(this._events[name]) {
+            for(var i = 0, l = this._events[name].length; i < l; ++i) {
+                if(this._events[name][i] === fn) {
+                    this._events[name].splice(i, 1);
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+    return EventDispatcher;
+})();
 var Popup = (function (_super) {
     __extends(Popup, _super);
     function Popup(url, options) {
@@ -59,10 +73,100 @@ var Popup = (function (_super) {
         this.url = url;
         this.options = options;
         this.reference = -1;
-        if(this.options.name == '') {
-            this.options.name = String.uniqueID();
-        }
+        this.callbackInterval = -1;
+        this.window = null;
+        this.options = null;
     }
+    Popup.prototype.set = function (k, v) {
+        if(typeof (this.options[k]) !== 'undefined') {
+            this.options[k] = v;
+            if(k === 'x' || k === 'y') {
+            }
+        }
+        return this;
+    };
+    Popup.prototype.get = function (k) {
+        if(typeof (this.options[k]) !== 'undefined') {
+            return this.options[k];
+        }
+        return false;
+    };
+    Popup.prototype.open = function () {
+        if(this.window !== null) {
+            clearInterval(this.callbackInterval);
+        }
+        var params = [];
+        var value = '';
+
+        for(var name in this.options) {
+            if(this.options.hasOwnProperty(name)) {
+                value = this.options[name];
+                if(name == 'x' || name == 'y' || name == 'name') {
+                    return;
+                }
+                if(name == 'width' || name == 'height') {
+                    value = parseInt(value) + 'px';
+                }
+                params.push(name + '=' + value);
+            }
+        }
+        this.window = window.open(this.url, this.options.name, params.join(','));
+    };
+    Popup.prototype.moveTo = function (x, y) {
+        if (typeof x === "undefined") { x = null; }
+        if (typeof y === "undefined") { y = null; }
+        if(typeof (x) == 'string') {
+            switch(x) {
+                case 'center': {
+                    x = (window.screen.width - this.get('width')) / 2;
+                    break;
+                }
+
+                case 'left': {
+                    x = 0;
+                    break;
+                }
+
+                case 'right': {
+                    x = (window.screen.width - this.get('width'));
+                    break;
+                }
+
+            }
+        }
+        if(typeof (y) == 'string') {
+            switch(y) {
+                case 'center': {
+                    y = (window.screen.height - this.get('height')) / 2;
+                    break;
+                }
+
+                case 'top': {
+                    y = 0;
+                    break;
+                }
+
+                case 'bottom': {
+                    y = (window.screen.height - this.get('height'));
+                    break;
+                }
+
+            }
+        }
+        this.set('x', parseInt(x));
+        this.set('y', parseInt(y));
+        if(this.window) {
+            this.window.moveTo(this.get('x'), this.get('y'));
+        }
+    };
+    Popup.prototype.close = function () {
+        if(this.window === null) {
+            return;
+        }
+        this.window.close();
+        Popup.remove(this);
+        this.window = null;
+    };
     Popup.count = 0;
     Popup.reference = [];
     Popup.events = {
@@ -77,39 +181,29 @@ var Popup = (function (_super) {
         delete (Popup.reference[popup.reference]);
     }
     Popup.fireEvent = function fireEvent(name, data) {
+        if (typeof data === "undefined") { data = null; }
         if(!this.events[name]) {
             this.events[name] = [];
         }
         this._events[name].push(data);
     }
     Popup.hasEvents = function hasEvents() {
-        var has = false;
-        if(Object.getLength(this._events) > 0) {
-            Object.each(this._events, function (name, events) {
-                if(events.length > 0) {
-                    has = true;
+        for(var name in this._events) {
+            if(this._events.hasOwnProperty(name)) {
+                if(this._events[name].length > 0) {
+                    return true;
                 }
-            });
+            }
         }
-        return has;
     }
     Popup.close = function close() {
-        if(this.hasEvents()) {
-            this._closeInterval = (function () {
-                if(this.hasEvents()) {
-                    clearInterval(this._closeInterval);
-                    window.close();
-                }
-            }).periodical(200, this);
-        } else {
-            window.close();
-        }
+        Popup.fireEvent('closePopupWindow');
     }
     return Popup;
-})(Events);
+})(EventDispatcher);
 var PopupOptions = (function () {
     function PopupOptions() {
-        this.name = '';
+        this.name = uniqueID();
         this.status = false;
         this.toolbar = false;
         this.location = false;
