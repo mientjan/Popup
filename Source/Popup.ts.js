@@ -1,59 +1,75 @@
-var __extends = this.__extends || function (d, b) {
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-}
-(function (Object) {
-    var hasOwnProperty = Object.prototype.hasOwnProperty;
-    Object.prototype.keys = function (object) {
-        var keys = [];
-        for(var key in object) {
-            if(hasOwnProperty.call(object, key)) {
-                keys.push(key);
-            }
-        }
-        return keys;
-    } , Object.prototype.values = function (object) {
-        var values = [];
-        for(var key in object) {
-            if(hasOwnProperty.call(object, key)) {
-                values.push(object[key]);
-            }
-        }
-        return values;
-    };
-    Object.prototype.getLength = function (object) {
-        return Object.keys(object).length;
-    };
-})(Object);
-var UID = Date.now();
-function uniqueID() {
-    return (++UID).toString(UID);
-}
-var EventDispatcher = (function () {
-    function EventDispatcher() {
+var Popup = (function () {
+    function Popup(url, options) {
+        this.url = url;
+        this._reference = -1;
+        this._callbackInterval = -1;
+        this._window = null;
+        this._options = null;
+        this._postDataBuffer = [];
         this._events = {
         };
+        this._options.name = options.name || uniqueID();
+        this._options.status = options.status || false;
+        this._options.toolbar = options.toolbar || false;
+        this._options.location = options.location || false;
+        this._options.menubar = options.menubar || false;
+        this._options.directories = options.directories || false;
+        this._options.resizable = options.resizable || false;
+        this._options.scrollbars = options.scrollbars || false;
+        this._options.height = parseInt(options.height) || 500;
+        this._options.width = parseInt(options.width) || 500;
+        this._options.x = options.x || 0;
+        this._options.y = options.y || 0;
     }
-    EventDispatcher.prototype.addEvent = function (name, fn) {
+    Popup.prototype.set = function (k, v) {
+        if(typeof this._options[k] !== 'undefined') {
+            this._options[k] = v;
+        }
+        return this;
+    };
+    Popup.prototype.get = function (k) {
+        if(typeof this._options[k] !== 'undefined') {
+            return this._options[k];
+        }
+        return false;
+    };
+    Popup.prototype.addEvent = function (name, fn) {
         if(!this._events[name]) {
             this._events[name] = new Array();
         }
         this._events[name].push(fn);
     };
-    EventDispatcher.prototype.fireEvent = function (name, data) {
-        if(this._events[name]) {
-            for(var i = 0, l = this._events[name].length; i < l; ++i) {
-                this._events[name][i].call(null, data);
+    Popup.prototype.addEvents = function (events) {
+        for(var name in events) {
+            if(events.hasOwnProperty(name)) {
+                if(!this._events[name]) {
+                    this._events[name] = new Array();
+                    this._events[name].push(events[name]);
+                }
             }
         }
     };
-    EventDispatcher.prototype.removeEvents = function (name) {
+    Popup.prototype.callEvent = function (name, data) {
+        this._window.postMessage(Popup.encodeRequest(name, data), '*');
+    };
+    Popup.prototype.recieveEvent = function (data) {
+        var str = JSON.decode(data);
+    };
+    Popup.prototype.fireEvent = function (name, data) {
+        if(!this._events[name]) {
+            for(var i = 0, l = this._events[name].length; i < l; ++i) {
+                if(this._events.hasOwnProperty(name)) {
+                    this._events[name][i].call(null, data);
+                }
+            }
+        }
+    };
+    Popup.prototype.removeEvents = function (name) {
         if(this._events[name]) {
             this._events[name].length = 0;
         }
     };
-    EventDispatcher.prototype.removeEvent = function (name, fn) {
+    Popup.prototype.removeEvent = function (name, fn) {
         if(this._events[name]) {
             for(var i = 0, l = this._events[name].length; i < l; ++i) {
                 if(this._events[name][i] === fn) {
@@ -64,43 +80,16 @@ var EventDispatcher = (function () {
         }
         return false;
     };
-    return EventDispatcher;
-})();
-var Popup = (function (_super) {
-    __extends(Popup, _super);
-    function Popup(url, options) {
-        _super.call(this);
-        this.url = url;
-        this.options = options;
-        this.reference = -1;
-        this.callbackInterval = -1;
-        this.window = null;
-        this.options = null;
-    }
-    Popup.prototype.set = function (k, v) {
-        if(typeof (this.options[k]) !== 'undefined') {
-            this.options[k] = v;
-            if(k === 'x' || k === 'y') {
-            }
-        }
-        return this;
-    };
-    Popup.prototype.get = function (k) {
-        if(typeof (this.options[k]) !== 'undefined') {
-            return this.options[k];
-        }
-        return false;
-    };
     Popup.prototype.open = function () {
-        if(this.window !== null) {
-            clearInterval(this.callbackInterval);
+        if(this._window !== null) {
+            clearInterval(this._callbackInterval);
         }
         var params = [];
         var value = '';
 
-        for(var name in this.options) {
-            if(this.options.hasOwnProperty(name)) {
-                value = this.options[name];
+        for(var name in this._options) {
+            if(this._options.hasOwnProperty(name)) {
+                value = this._options[name];
                 if(name == 'x' || name == 'y' || name == 'name') {
                     return;
                 }
@@ -110,7 +99,13 @@ var Popup = (function (_super) {
                 params.push(name + '=' + value);
             }
         }
-        this.window = window.open(this.url, this.options.name, params.join(','));
+        this._window = window.open(this.url, this._options.name, params.join(','));
+        this.moveTo(this.get('x'), this.get('y'));
+        if(this._postDataBuffer.length > 0) {
+            this._postDataBuffer.forEach(function (value, key) {
+            });
+            this._postDataBuffer.length = 0;
+        }
     };
     Popup.prototype.moveTo = function (x, y) {
         if (typeof x === "undefined") { x = null; }
@@ -153,66 +148,66 @@ var Popup = (function (_super) {
 
             }
         }
-        this.set('x', parseInt(x));
-        this.set('y', parseInt(y));
-        if(this.window) {
-            this.window.moveTo(this.get('x'), this.get('y'));
+        if(this._window) {
+            this._window.moveTo(parseInt(x), parseInt(y));
         }
     };
     Popup.prototype.close = function () {
-        if(this.window === null) {
+        if(this._window === null) {
             return;
         }
-        this.window.close();
-        Popup.remove(this);
-        this.window = null;
+        this._window.close();
+        this._window = null;
     };
-    Popup.count = 0;
-    Popup.reference = [];
-    Popup.events = {
+    Popup.close = function close() {
+        window.close();
+    }
+    Popup.encodeRequest = function encodeRequest(name, data) {
+        return JSON.encode(arguments);
+    }
+    Popup.decodeRequest = function decodeRequest(data) {
+        return JSON.decode(data);
+    }
+    Popup._events = {
     };
-    Popup.closeInterval = 0;
-    Popup.add = function add(popup) {
-        popup.reference = Popup.count;
-        this.reference[Popup.count] = popup;
-        ++Popup.count;
-    }
-    Popup.remove = function remove(popup) {
-        delete (Popup.reference[popup.reference]);
-    }
-    Popup.fireEvent = function fireEvent(name, data) {
-        if (typeof data === "undefined") { data = null; }
-        if(!this.events[name]) {
-            this.events[name] = [];
+    Popup.addEvent = function addEvent(name, fn) {
+        if(!this._events[name]) {
+            this._events[name] = new Array();
         }
-        this._events[name].push(data);
+        this._events[name].push(fn);
     }
-    Popup.hasEvents = function hasEvents() {
-        for(var name in this._events) {
-            if(this._events.hasOwnProperty(name)) {
-                if(this._events[name].length > 0) {
-                    return true;
+    Popup.addEvents = function addEvents(events) {
+        for(var name in events) {
+            if(events.hasOwnProperty(name)) {
+                if(!this._events[name]) {
+                    this._events[name] = new Array();
+                    this._events[name].push(events[name]);
                 }
             }
         }
     }
-    Popup.close = function close() {
-        Popup.fireEvent('closePopupWindow');
+    Popup.fireEvent = function fireEvent(name, data) {
+        if(this._events[name]) {
+            for(var i = 0, l = this._events[name].length; i < l; ++i) {
+                this._events[name][i].call(null, data);
+            }
+        }
+    }
+    Popup.removeEvents = function removeEvents(name) {
+        if(this._events[name]) {
+            this._events[name].length = 0;
+        }
+    }
+    Popup.removeEvent = function removeEvent(name, fn) {
+        if(this._events[name]) {
+            for(var i = 0, l = this._events[name].length; i < l; ++i) {
+                if(this._events[name][i] === fn) {
+                    this._events[name].splice(i, 1);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     return Popup;
-})(EventDispatcher);
-var PopupOptions = (function () {
-    function PopupOptions() {
-        this.name = uniqueID();
-        this.status = false;
-        this.toolbar = false;
-        this.location = false;
-        this.menubar = false;
-        this.directories = false;
-        this.resizable = false;
-        this.scrollbars = false;
-        this.height = 500;
-        this.width = 500;
-    }
-    return PopupOptions;
 })();
