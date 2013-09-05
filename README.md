@@ -99,9 +99,3 @@ Available methods
 	authPopup.set('y', 'top' ); 
 	authPopup.set('y', 'center' ); 
 	authPopup.set('y', 'bottom' ); 
-
-
-no lib version
---------------
-
-Has been removed do to bugs. Time constraints have forced me to remove this version and concentrate on the mootools version of this functionality.

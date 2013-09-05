@@ -7,8 +7,7 @@ and open the template in the editor.
 	<head>
 		<title>Popup - Example</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-		<script src="mootools-core-1.4.2.js"></script>
-		<script src="../Source/Popup.js"></script>
+		<script src="../source/popup.js"></script>
 	</head>
 	<body>
 		
@@ -16,24 +15,24 @@ and open the template in the editor.
 		
 		<script>
 			
-			var aNewWindow = new Popup('popup.html', {
+			var newWindow = new Popup('Popup.html', {
 				'width':500,
 				'height':400,
 				'x':'center',
 				'y':'center'
 			});
 			
-			aNewWindow.addEvent('success', function(response){
+			newWindow.addEventListener('success', function(response){
 				alert('The user pressed on the success button in the popup');
 			});
 			
-			aNewWindow.addEvent('failed', function(response){
+			newWindow.addEventListener('failed', function(response){
 				alert('The user pressed on the failed button in the popup');
 			});
 			
-			$('popupOpener').addEvent('click', function(e){
-				aNewWindow.open();
-			});
+			document.getElementById('popupOpener').onclick = function(e){
+				newWindow.open();
+			};
 		</script>
 	</body>
 </html>
