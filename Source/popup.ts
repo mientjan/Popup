@@ -267,27 +267,6 @@ class Popup {
 		Popup.remove(this);
 	}
 
-	private _checkFiredEvents()
-	{
-//		try
-//		{
-//			Object.each( this.$events, function( events, name )
-//			{
-//				if( this.window.Popup._events[name]
-//					&& this.window.Popup._events[name].length > 0 )
-//				{
-//					this.window.Popup._events[name].each(function(data)
-//					{
-//						this.fireEvent(name, data);
-//					}, this );
-//
-//					this.window.Popup._events[name].length = 0;
-//				}
-//			}, this );
-//		} catch(e){}
-
-	}
-
 	public getWindow(){
 		return this._window;
 	}

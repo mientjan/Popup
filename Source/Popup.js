@@ -196,8 +196,6 @@ var Popup = (function () {
         this._window.close();
         Popup.remove(this);
     };
-    Popup.prototype._checkFiredEvents = function () {
-    };
     Popup.prototype.getWindow = function () {
         return this._window;
     };
