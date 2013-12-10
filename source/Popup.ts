@@ -282,7 +282,7 @@ class Popup {
 		// start callback checker
 		if( Popup.Browser().Platform.name == 'ios' ){
 			window.addEventListener('message', (message:MessageEvent) => {
-				
+
 				if( this.isOriginAllowed(message.origin) ){
 					var data = Popup.postMessageDecode(message.data);
 					this.fireEvent( data.name, data.data );
