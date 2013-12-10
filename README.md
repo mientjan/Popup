@@ -1,64 +1,42 @@
-Popup
-===========
+# Popup
 
-With Popup you can create, manipulate and communicate between its opener and the object it self.
+
+With Popup you can create, manipulate and communicate between the window that opened the popup and the popup it self.
 
 ![Screenshot](https://github.com/mientjan/Popup/raw/master/screenshot.png)
 
-a working example is provided in Example
+@see example/ too see it in practise. 
 
-How to Use
-----------
+## Example
 
-	var authPopup = new Popup('OAuth2.php', {
-		'width':300,
-		'height':150,
-		'x':'center', 
-		'y':'center' 
-	});
-	// popup is centered in the middle.
+> create new instance for a popup.
 
-	// create a callback so when Popup.fireEvent('success', 'some data') is called in the popup this method is called.
-	authPopup.addEventListener('success', function(response){
-		alert('callback is called and this response is given:' + response ');
-	});
-
-	// popup is opened.
-	authPopup.open();
-
-
-
-Please do not call window.close in the opened popup.
-
-	window.close(); 
-
-but call 
-
-	Popup.close(); 
-
-this is because of browser and security issues relating to passing data 
-between the popup and the opener of the popup.
-
-Available methods
------------------
-
-	/**
-	 *	Getters
-	 */
-
-	var authPopup = new Popup('OAuth2.php', {
+	var popupWindow = new Popup('OAuth2.php', {
 		'width':300,
 		'height':150,
 		'x':'center', 
 		'y':'center' 
 	});
 
-	authPopup.addEventListener('success', function(response){
+> create a listener for 'success'.
+
+	popupWindow.addEventListener('success', function(response){
 		alert('callback is called and this response is given:' + response ');
 	});
 
-	authPopup.open();
-	authPopup.close();
+	popupWindow.open();
+	
+> popup is opened, in the popup you can send messages back too the one that has opened de popup.
+
+	Popup.dispatchEvent('success', {'message':'The Popup has opened'});
+	
+> this can be done vice versa. So you can send messages from the main window to the popup. 
+And from the popup to the main window. This is also possible when the main window and the popup are on different domains.
+
+
+## Available methods
+
+> Getters
 
 	var windowObject = authPopup.getWindow();
 	authPopup.get('status'); // The status bar at the bottom of the window.
@@ -73,11 +51,9 @@ Available methods
 	authPopup.get('x'); // position of popup relative to screen/window
 	authPopup.get('y'); // position of popup relative to screen/window
 	
-	/**
-	 * 	Setters
-	 * 	You can  only set these properties before the popup is popened.
-	 **/
-	
+> Setters
+You can  only set these properties before the popup is popened.
+
 	authPopup.set('status', true ); // The status bar at the bottom of the window.
 	authPopup.set('toolbar', true ); // The standard browser toolbar, with buttons such as Back and Forward.
 	authPopup.set('location', true ); // 1 The Location entry field where you enter the URL.
@@ -88,7 +64,7 @@ Available methods
 	authPopup.set('height', 150 ); // Specifies the height of the window in pixels. (example: height='350')
 	authPopup.set('width', 300 ); // Specifies the width of the window in pixels.
 	
-	// Except for 
+> Except for 
 
 	// position of popup relative to screen/window
 	authPopup.set('x', 'center' ); 
