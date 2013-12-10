@@ -1,6 +1,5 @@
 var Popup = (function () {
     function Popup(url, options) {
-        var _this = this;
         this._options = {
             'name': null,
             'status': 0,
@@ -18,6 +17,7 @@ var Popup = (function () {
         this._window = null;
         this._url = '';
         this._reference = -1;
+        this._interval = -1;
         this._events = {
         };
         this.setOptions(options);
@@ -29,29 +29,90 @@ var Popup = (function () {
             window['UID']++;
             this._options.name = window['UID'].toString();
         }
-        Popup.subscribeEntity(this);
-        window.addEventListener('message', function (e) {
-            _this._receiveMessage(e);
-        });
+        if(Popup.Browser().name == 'ie' && Popup.Browser().version < 10) {
+        } else {
+            window.addEventListener('onmessage', function (e) {
+                try  {
+                    Popup.receiveMessage(e);
+                } catch (err) {
+                }
+            });
+        }
     }
-    Popup.subscribeEntity = function subscribeEntity(pop) {
-        pop._reference = Popup._count;
-        Popup._reference[Popup._count] = pop;
-        Popup._count++;
+    Popup.Browser = function Browser() {
+        var document = window.document;
+        var ua = navigator.userAgent.toLowerCase(), platform = navigator.platform.toLowerCase(), UA = ua.match(/(opera|ie|firefox|chrome|version)[\s\/:]([\w\d\.]+)?.*?(safari|version[\s\/:]([\w\d\.]+)|$)/) || [
+            null, 
+            'unknown', 
+            0
+        ], mode = UA[1] == 'ie' && document.documentMode;
+        var Browser = {
+            name: (UA[1] == 'version') ? UA[3] : UA[1],
+            version: mode || parseFloat((UA[1] == 'opera' && UA[4]) ? UA[4] : UA[2]),
+            Platform: {
+                name: ua.match(/ip(?:ad|od|hone)/) ? 'ios' : (ua.match(/(?:webos|android)/) || platform.match(/mac|win|linux/) || [
+                    'other'
+                ])[0]
+            },
+            Features: {
+                xpath: !!(document['evaluate']),
+                air: !!(window['runtime']),
+                query: !!(document.querySelector),
+                json: !!(window['JSON'])
+            },
+            Plugins: {
+            }
+        };
+        return Browser;
     };
-    Popup.remove = function remove(o) {
-        delete Popup._reference[o.reference];
+    Popup.encodeMessage = function encodeMessage(name, properties) {
+        return JSON.stringify({
+            name: name,
+            data: properties
+        });
+    };
+    Popup.decodeMessage = function decodeMessage(data) {
+        try  {
+            return JSON.parse(data);
+        } catch (e) {
+        }
+        return {
+            name: '',
+            data: {
+            }
+        };
+    };
+    Popup.close = function close() {
+        window.close();
     };
     Popup._count = 0;
     Popup._reference = [];
     Popup._events = {
     };
     Popup._closeInterval = null;
+    Popup.subscribeEntity = function subscribeEntity(pop) {
+        pop._reference = Popup._count;
+        Popup._reference[Popup._count] = pop;
+        Popup._count++;
+    };
+    Popup.removeEntity = function removeEntity(o) {
+        delete Popup._reference[o._reference];
+    };
     Popup.addEventListener = function addEventListener(name, fn) {
         if(typeof (Popup._events[name]) == 'undefined') {
             Popup._events[name] = [];
         }
         Popup._events[name].push(fn);
+    };
+    Popup.removeEventListener = function removeEventListener(name, fn) {
+        if(typeof (Popup._events[name]) != 'undefined') {
+            for(var i = 0; i < Popup._events[name].length; i++) {
+                if(Popup._events[name][i] == fn) {
+                    Popup._events[name].splice(i);
+                    --i;
+                }
+            }
+        }
     };
     Popup.dispatchEvent = function dispatchEvent(name, properties, other) {
         if (typeof other === "undefined") { other = true; }
@@ -62,26 +123,22 @@ var Popup = (function () {
                 }
             }
         } else {
-            var message = Popup.encodePostMessage(name, properties);
-            window.opener.postMessage(Popup.encodePostMessage(name, properties), location['origin']);
+            var message = Popup.encodeMessage(name, properties);
+            if(this.Browser().name == 'ie' && this.Browser().verson < 10) {
+                window.opener['Popup'].receiveMessage({
+                    origin: location['origin'],
+                    data: message
+                });
+            } else {
+                window.opener.postMessage(message, location['origin']);
+            }
         }
     };
     Popup.receiveMessage = function receiveMessage(e) {
-        var data = Popup.decodePostMessage(e.data);
+        var data = Popup.decodeMessage(e.data);
         Popup.dispatchEvent(data.name, data.data, false);
     };
-    Popup.close = function close() {
-        window.close();
-    };
-    Popup.encodePostMessage = function encodePostMessage(name, properties) {
-        return JSON.stringify({
-            name: name,
-            data: properties
-        });
-    };
-    Popup.decodePostMessage = function decodePostMessage(data) {
-        return JSON.parse(data);
-    };
+    Popup._name = 'popup.019273';
     Popup.prototype.setOptions = function (options) {
         for(var i in this._options) {
             if(this._options.hasOwnProperty(i)) {
@@ -107,10 +164,10 @@ var Popup = (function () {
         return false;
     };
     Popup.prototype.addEventListener = function (name, fn) {
-        if(typeof (this._events[name]) == 'undefined') {
-            this._events[name] = [];
-        }
-        this._events[name].push(fn);
+        Popup.addEventListener(name, fn);
+    };
+    Popup.prototype.removeEventListener = function (name, fn) {
+        Popup.removeEventListener(name, fn);
     };
     Popup.prototype.dispatchEvent = function (name, properties, other) {
         if (typeof other === "undefined") { other = true; }
@@ -121,11 +178,15 @@ var Popup = (function () {
                 }
             }
         } else {
-            this._window.postMessage(Popup.encodePostMessage(name, properties), '*');
+            if(Popup.Browser().name == 'ie' && Popup.Browser().version < 10) {
+                this._window.Popup.receiveMessage(Popup.encodeMessage(name, properties));
+            } else {
+                this._window.postMessage(Popup.encodeMessage(name, properties), '*');
+            }
         }
     };
     Popup.prototype._receiveMessage = function (e) {
-        var data = Popup.decodePostMessage(e.data);
+        var data = Popup.decodeMessage(e.data);
         this.dispatchEvent(data.name, data.data, false);
     };
     Popup.prototype.open = function () {
@@ -144,9 +205,23 @@ var Popup = (function () {
             }
         }
         this._window = window.open(this._url, this._options.name, params.join(','));
-        this._window.addEventListener('message', function (e) {
-            _this._receiveMessage(e);
-        });
+        if(Popup.Browser().name == 'ie' && Popup.Browser().version < 10) {
+            this._interval = setInterval(function () {
+                var data = window.localStorage.getItem(Popup._name);
+                if(data != null) {
+                    data = Popup.decodeMessage(data);
+                    _this.dispatchEvent(data.name, data.data, false);
+                    window.localStorage.removeItem(Popup._name);
+                }
+            });
+        } else {
+            window.addEventListener('message', function (e) {
+                try  {
+                    _this._receiveMessage(e);
+                } catch (err) {
+                }
+            }, false);
+        }
         this._moveTo();
     };
     Popup.prototype._moveTo = function () {
@@ -190,17 +265,15 @@ var Popup = (function () {
         this._window.moveTo(parseInt(x), parseInt(y));
     };
     Popup.prototype.close = function () {
+        Popup.removeEntity(this);
         if(this._window === null) {
             return;
         }
         this._window.close();
-        Popup.remove(this);
     };
     Popup.prototype.getWindow = function () {
         return this._window;
     };
     return Popup;
 })();
-window.addEventListener('message', function (e) {
-    Popup.receiveMessage(e);
-}, false);
+window['Popup'] = Popup;
