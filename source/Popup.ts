@@ -90,6 +90,14 @@ class Popup {
 		return window.localStorage.removeItem(Popup.uniqueName + name);
 	}
 
+	public static postMessageEncode(name:any, data:any){
+		return JSON.stringify({name:name, data:data});
+	}
+
+	public static postMessageDecode(data):{name:any;data:any;}{
+		return JSON.parse(data);
+	}
+
 	public static remove(o){
 		delete Popup._reference[o.reference];
 	}
@@ -97,7 +105,9 @@ class Popup {
 	public static fireEvent( name:string, data:string )
 	{
 		if( Popup.Browser().Platform.name == 'ios' ){
-			window.localStorage.setItem( Popup.uniqueName + name, data );
+//			window.localStorage.setItem( Popup.uniqueName + name, data );
+
+			window.opener.postMessage(Popup.postMessageEncode(name, data), '*');
 		} else {
 			if(!Popup._events[name])
 			{
@@ -166,6 +176,8 @@ class Popup {
 	_callbackInterval:number = 0;
 	callbackInterval:number = 0;
 	eventCheckingInterval:number;
+	_origin = [];
+
 
 	constructor(url,options)
 	{
@@ -185,6 +197,21 @@ class Popup {
 				this.options[name] = options[name];
 			}
 		}
+	}
+
+	addOrigin(name:string){
+		this._origin.push(name);
+	}
+
+	isOriginAllowed(name:string){
+		var allowed = false;
+		for (var i = 0; i < this._origin.length; i++) {
+			if( this._origin[i].indexOf(name)> -1){
+				allowed = true;
+			}
+		}
+
+		return allowed;
 	}
 
 	addEvent(name:string, cb:Function ){
@@ -250,12 +277,22 @@ class Popup {
 		}
 
 		this.window = window.open(this.url, this.options.name, params.join(',') );
-		this._moveTo();
+		this._moveTo(); 
 
 		// start callback checker
-		this.eventCheckingInterval = setInterval(() => {
-			this._checkFiredEvents();
-		},200);
+		if( Popup.Browser().Platform.name == 'ios' ){
+			window.addEventListener('message', (message:MessageEvent) => {
+				
+				if( this.isOriginAllowed(message.origin) ){
+					var data = Popup.postMessageDecode(message.data);
+					this.fireEvent( data.name, data.data );
+				}
+			}, false );
+		} else {
+			this.eventCheckingInterval = setInterval(() => {
+				this._checkFiredEvents();
+			},200);
+		}
 	}
 
 	_moveTo(){
@@ -323,14 +360,10 @@ class Popup {
 		try
 		{
 			if( Popup.Browser().Platform.name == 'ios'){
-
-				console.log( window.localStorage.length );
 				for (var i = 0; i < window.localStorage.length; i++) {
 					var name = window.localStorage.key(i);
-					console.log( name, name.indexOf(Popup.uniqueName) );
 					if( name.indexOf(Popup.uniqueName) == 0){
 						name = name.substr(Popup.uniqueName.length);
-						console.log( name, Popup.getFromLocalStorage(name) );
 						this.fireEvent( name, Popup.getFromLocalStorage(name) );
 						Popup.removeFromLocalStorage(name)
 					}
