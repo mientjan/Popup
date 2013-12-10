@@ -20,14 +20,14 @@ And it works on all browsers even when the popupwindow has gone crossdomain.</te
 			
 			document.getElementById('success').onclick = function(e){
 				console.log('click');
-				Popup.dispatchEvent('success', document.getElementById('textarea').value);
-//				Popup.close();
+				Popup.fireEvent('success', document.getElementById('textarea').value);
+				Popup.close();
 			};
 
 			document.getElementById('failed').onclick = function(e){
 				console.log('click');
-				Popup.dispatchEvent('failed', document.getElementById('textarea').value);
-//				Popup.close();
+				Popup.fireEvent('failed', document.getElementById('textarea').value);
+				Popup.close();
 			};
 			
 		</script>

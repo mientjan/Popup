@@ -7,7 +7,7 @@ and open the template in the editor.
 	<head>
 		<title>Popup - Example</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-		<script src="../Source/popup.js"></script>
+		<script src="../source/Popup.js"></script>
 	</head>
 	<body>
 		
@@ -22,11 +22,11 @@ and open the template in the editor.
 				'y':'center'
 			});
 			
-			newWindow.addEventListener('success', function(response){
+			newWindow.addEvent('success', function(response){
 				alert('The user pressed on the success button in the popup');
 			});
 			
-			newWindow.addEventListener('failed', function(response){
+			newWindow.addEvent('failed', function(response){
 				alert('The user pressed on the failed button in the popup');
 			});
 			
