@@ -1,0 +1,44 @@
+var UID: number;
+class Popup {
+    static uniqueName: string;
+    private static _Browser;
+    static Browser();
+    static _count: number;
+    static _reference: any[];
+    static _events: {};
+    static _closeInterval: number;
+    static add(o): void;
+    static getFromLocalStorage(name);
+    static removeFromLocalStorage(name): void;
+    static postMessageEncode(name: any, data: any): string;
+    static postMessageDecode(data): {
+        name: any;
+        data: any;
+    };
+    static remove(o): void;
+    static fireEvent(name: string, data: string): void;
+    static hasEvents(): bool;
+    static close(): void;
+    public url: string;
+    private options;
+    private _events;
+    public window: Window;
+    public reference: string;
+    public _callbackInterval: number;
+    public callbackInterval: number;
+    public eventCheckingInterval: number;
+    public _origin: any[];
+    constructor(url, options);
+    public setOptions(options): void;
+    public addOrigin(name: string): void;
+    public isOriginAllowed(name: string): bool;
+    public addEvent(name: string, cb: Function): void;
+    public fireEvent(name: string, data: any): void;
+    public set(k, v): Popup;
+    public get(k);
+    public open(): void;
+    public _moveTo(): void;
+    public close(): void;
+    public _checkFiredEvents(): void;
+    public getWindow(): Window;
+}
