@@ -30,6 +30,14 @@ String['uniqueID'] = function(){
 	return (UID++).toString(36);
 };
 
+if(typeof console == 'undefined' ){
+	var console = {
+		log:function(){
+
+		}
+	}
+}
+
 class Popup {
 
 	public static uniqueName = 'PopupALDYUB';
@@ -104,12 +112,12 @@ class Popup {
 
 	public static fireEvent( name:string, data:string )
 	{
-		if( Popup.Browser().Platform.name == 'ios' ){
+		if( Popup.Browser().Platform.name == 'ios' ){ 
 //			window.localStorage.setItem( Popup.uniqueName + name, data );
 
-			window.opener.postMessage(Popup.postMessageEncode(name, data), '*');
+			window.opener.postMessage(Popup.postMessageEncode(name, data), location.protocol + '//' + location.hostname);
 		} else {
-			if(!Popup._events[name])
+			if(typeof Popup._events[name] == 'undefined')
 			{
 				Popup._events[name] = [];
 			}
@@ -129,9 +137,12 @@ class Popup {
 				}
 			}
 		} else {
+
+
+
 			for (var name in this._events) {
 				if(this._events.hasOwnProperty(name) ){
-					if( this._events.length>0){
+					if( this._events[name].length>0){
 						has = true;
 					}
 				}
@@ -141,9 +152,14 @@ class Popup {
 	};
 
 	public static close(){
-		if(Popup.hasEvents()){
+		console.log(Popup.hasEvents());
+		if(Popup.hasEvents() && Popup.Browser().Platform.name != 'ios'){
+			clearInterval(Popup._closeInterval);
 			Popup._closeInterval = setInterval(() => {
-				if(Popup.hasEvents()){
+
+				console.log(Popup.hasEvents());
+
+				if(!Popup.hasEvents()){
 					clearInterval(Popup._closeInterval);
 					window.close();
 				}
@@ -281,7 +297,13 @@ class Popup {
 
 		// start callback checker
 		if( Popup.Browser().Platform.name == 'ios' ){
-			window.addEventListener('message', (message:MessageEvent) => {
+
+			// Create IE + others compatible event handler
+			var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
+			var eventer = window[eventMethod];
+			var messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
+
+			eventer(messageEvent, (message:MessageEvent) => {
 
 				if( this.isOriginAllowed(message.origin) ){
 					var data = Popup.postMessageDecode(message.data);
@@ -359,16 +381,17 @@ class Popup {
 	{
 		try
 		{
-			if( Popup.Browser().Platform.name == 'ios'){
-				for (var i = 0; i < window.localStorage.length; i++) {
-					var name = window.localStorage.key(i);
-					if( name.indexOf(Popup.uniqueName) == 0){
-						name = name.substr(Popup.uniqueName.length);
-						this.fireEvent( name, Popup.getFromLocalStorage(name) );
-						Popup.removeFromLocalStorage(name)
-					}
-				}
-			} else {
+//			if( Popup.Browser().Platform.name == 'ios'){
+//				for (var i = 0; i < window.localStorage.length; i++) {
+//					var name = window.localStorage.key(i);
+//					if( name.indexOf(Popup.uniqueName) == 0){
+//						name = name.substr(Popup.uniqueName.length);
+//						this.fireEvent( name, Popup.getFromLocalStorage(name) );
+//						Popup.removeFromLocalStorage(name)
+//					}
+//				}
+//			} else {
+
 				for (var name in this._events) {
 					if(this._events.hasOwnProperty(name) ){
 						var events = this._events[name];
@@ -385,7 +408,7 @@ class Popup {
 					}
 				}
 
-			}
+//			}
 
 		} catch(e){}
 

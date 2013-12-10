@@ -2,6 +2,12 @@ var UID = Date.now();
 String['uniqueID'] = function () {
     return (UID++).toString(36);
 };
+if(typeof console == 'undefined') {
+    var console = {
+        log: function () {
+        }
+    };
+}
 var Popup = (function () {
     function Popup(url, options) {
         this.url = '';
@@ -94,9 +100,9 @@ var Popup = (function () {
     };
     Popup.fireEvent = function fireEvent(name, data) {
         if(Popup.Browser().Platform.name == 'ios') {
-            window.opener.postMessage(Popup.postMessageEncode(name, data), '*');
+            window.opener.postMessage(Popup.postMessageEncode(name, data), location.protocol + '//' + location.hostname);
         } else {
-            if(!Popup._events[name]) {
+            if(typeof Popup._events[name] == 'undefined') {
                 Popup._events[name] = [];
             }
             Popup._events[name].push(data);
@@ -114,7 +120,7 @@ var Popup = (function () {
         } else {
             for(var name in this._events) {
                 if(this._events.hasOwnProperty(name)) {
-                    if(this._events.length > 0) {
+                    if(this._events[name].length > 0) {
                         has = true;
                     }
                 }
@@ -123,9 +129,12 @@ var Popup = (function () {
         return has;
     };
     Popup.close = function close() {
-        if(Popup.hasEvents()) {
+        console.log(Popup.hasEvents());
+        if(Popup.hasEvents() && Popup.Browser().Platform.name != 'ios') {
+            clearInterval(Popup._closeInterval);
             Popup._closeInterval = setInterval(function () {
-                if(Popup.hasEvents()) {
+                console.log(Popup.hasEvents());
+                if(!Popup.hasEvents()) {
                     clearInterval(Popup._closeInterval);
                     window.close();
                 }
@@ -202,7 +211,10 @@ var Popup = (function () {
         this.window = window.open(this.url, this.options.name, params.join(','));
         this._moveTo();
         if(Popup.Browser().Platform.name == 'ios') {
-            window.addEventListener('message', function (message) {
+            var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
+            var eventer = window[eventMethod];
+            var messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
+            eventer(messageEvent, function (message) {
                 if(_this.isOriginAllowed(message.origin)) {
                     var data = Popup.postMessageDecode(message.data);
                     _this.fireEvent(data.name, data.data);
@@ -263,26 +275,15 @@ var Popup = (function () {
     };
     Popup.prototype._checkFiredEvents = function () {
         try  {
-            if(Popup.Browser().Platform.name == 'ios') {
-                for(var i = 0; i < window.localStorage.length; i++) {
-                    var name = window.localStorage.key(i);
-                    if(name.indexOf(Popup.uniqueName) == 0) {
-                        name = name.substr(Popup.uniqueName.length);
-                        this.fireEvent(name, Popup.getFromLocalStorage(name));
-                        Popup.removeFromLocalStorage(name);
-                    }
-                }
-            } else {
-                for(var name in this._events) {
-                    if(this._events.hasOwnProperty(name)) {
-                        var events = this._events[name];
-                        if(this.window['Popup']._events[name] && this.window['Popup']._events[name].length > 0) {
-                            for(var i = 0; i < this.window['Popup']._events[name].length; i++) {
-                                var data = this.window['Popup']._events[name][i];
-                                this.fireEvent(name, data);
-                            }
-                            this.window['Popup']._events[name].length = 0;
+            for(var name in this._events) {
+                if(this._events.hasOwnProperty(name)) {
+                    var events = this._events[name];
+                    if(this.window['Popup']._events[name] && this.window['Popup']._events[name].length > 0) {
+                        for(var i = 0; i < this.window['Popup']._events[name].length; i++) {
+                            var data = this.window['Popup']._events[name][i];
+                            this.fireEvent(name, data);
                         }
+                        this.window['Popup']._events[name].length = 0;
                     }
                 }
             }
